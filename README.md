@@ -11,9 +11,11 @@ A WordPress application with a MySQL database, ensuring persistent storage for t
 
 ### Clone the Repository
 
-```git clone https://github.com/pandey333/docker-wordpress.git```
-```cd docker-wordpress```
-
+```
+git clone https://github.com/pandey333/docker-wordpress.git
+cd docker-wordpress
+cd wpandmysql
+```
 - Run compose file and can check the wordpress page at your local machine if we are running this in local or we can use ec2 and aws services as explained in below sections.
 
 # AWS Environment Setup for WordPress Deployment
@@ -59,14 +61,18 @@ A WordPress application with a MySQL database, ensuring persistent storage for t
 
 #### Install Docker and Docker Compose in ec2.
      
-```sudo yum update -y```
-```sudo amazon-linux-extras install docker```
-```sudo service docker start```
-```sudo usermod -a -G docker ec2-user```
+```
+sudo yum update -y
+sudo amazon-linux-extras install docker
+sudo service docker start
+sudo usermod -a -G docker ec2-user
+```
 
-```sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose```
-```sudo chmod +x /usr/local/bin/docker-compose```
-```docker-compose --version```
+```
+sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose```
+docker-compose --version
+```
 
 ### Step 2: Setting Up an RDS Instance for MySQL
 
@@ -120,7 +126,7 @@ Bucket policy to allow public read access for WordPress uploads.
 
 **Attach IAM Role to EC2 Instance:**
 
-    - Attach the created role to the created ec2 instance.
+- Attach the created role to the created ec2 instance.
 
 ### Step 5: Connecting WordPress to RDS and S3
 
