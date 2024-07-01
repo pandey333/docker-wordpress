@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  wordpress:
+    image: wordpress:latest
+    restart: always
+    ports:
+      - 80:80
+    environment:
+      WORDPRESS_DB_HOST: my-rds-endpoint
+      WORDPRESS_DB_USER: my-db-user
+      WORDPRESS_DB_PASSWORD: my-db-password
+      WORDPRESS_DB_NAME: my-db-name
+      WORDPRESS_TABLE_PREFIX: wp_
+      WORDPRESS_DEBUG: 'false'
+      UPLOAD_MAX_FILESIZE: 64M
+      PHP_MAX_INPUT_VARS: 1000
+      PHP_MAX_EXECUTION_TIME: 300
+    volumes:
+      - wordpress:/var/www/html/wp-content
+      - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+
+  mysql:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: my-db-name
+      MYSQL_USER: my-db-user
+      MYSQL_PASSWORD: my-db-password
+      MYSQL_ROOT_PASSWORD: my-root-password
+    volumes:
+      - db:/var/lib/mysql
+
+volumes:
+  wordpress:
+  db:

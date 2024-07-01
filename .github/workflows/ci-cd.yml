@@ -1,0 +1,50 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main  
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  
+
+    env:
+      DOCKER_IMAGE: your-docker-image-name
+      AWS_REGION: your-aws-region
+      AWS_ACCOUNT_ID: your-aws-account-id
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      DB_HOST: ${{ secrets.DB_HOST }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2  
+
+      - name: Build Docker image
+        run: |
+          docker build -t $DOCKER_IMAGE .  # Build Docker image from Dockerfile
+          docker tag $DOCKER_IMAGE:latest $DOCKER_IMAGE:${{ github.run_number }}  # Tag Docker image with build number
+
+      - name: Test WordPress deployment
+        run: |
+          docker run -d -p 8080:80 --name wordpress $DOCKER_IMAGE:${{ github.run_number }}  # Run Docker container in detached mode
+          sleep 10  # Wait for WordPress to start
+          curl -f -s -o /dev/null http://localhost:8080  # Perform basic testing, e.g., checking if WordPress home page loads
+
+      - name: Deploy to AWS EC2
+        run: |
+          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+          aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+          aws configure set default.region $AWS_REGION
+          docker tag $DOCKER_IMAGE:${{ github.run_number }} $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$DOCKER_IMAGE:${{ github.run_number }}
+          docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$DOCKER_IMAGE:${{ github.run_number }}
+
+          ssh -o StrictHostKeyChecking=no ec2-user@$EC2_INSTANCE_IP 'docker pull $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$DOCKER_IMAGE:${{ github.run_number }}'
+
+      - name: Clean up
+        run: |
+          docker stop wordpress 
+          docker rm wordpress  
