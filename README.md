@@ -11,10 +11,10 @@ A WordPress application with a MySQL database, ensuring persistent storage for t
 
 ### Clone the Repository
 
-`git clone https://github.com/pandey333/docker-wordpress.git`
-`cd docker-wordpress`
+```git clone https://github.com/pandey333/docker-wordpress.git```
+```cd docker-wordpress```
 
-    Run compose file and can check the wordpress page at your local machine if we are running this in local or we can use ec2 and aws services as explained in below sections.
+- Run compose file and can check the wordpress page at your local machine if we are running this in local or we can use ec2 and aws services as explained in below sections.
 
 # AWS Environment Setup for WordPress Deployment
     1: Setting Up an EC2 Instance for Docker Containers
