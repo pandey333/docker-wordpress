@@ -197,11 +197,6 @@ Configure the Plugin:
 
 After activation, you may need to configure the plugin settings. This typically involves connecting the plugin to your AWS S3 bucket where you want to offload your media uploads. You will need to provide AWS credentials (Access Key ID and Secret Access Key) and specify the S3 bucket details.
 
-
-Complete Setup:
-
-This may include setting up permissions and configuring other settings according to your requirements.
-
 ### Verify S3 Uploads
 
 Once configured, upload a media file in wordpress. Verify that the file is uploaded to your AWS S3 bucket instead of the local server.
@@ -219,3 +214,86 @@ Once configured, upload a media file in wordpress. Verify that the file is uploa
 ### Verify WordPress Setup
 
 - Open a web browser and navigate to your EC2 instance's public IP address or domain name.
+
+### Configure GitHub Actions for CiCd with above created ec2
+
+- Create .github/workflows/main.yml with the following content
+
+```yaml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main  
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  
+
+    env:
+      DOCKER_IMAGE: your-docker-image-name
+      AWS_REGION: your-aws-region
+      AWS_ACCOUNT_ID: your-aws-account-id
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      DB_HOST: ${{ secrets.DB_HOST }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2  
+        
+      - name: Build Docker image
+        run: |
+          docker build -t $DOCKER_IMAGE .  # Build Docker image from Dockerfile
+          docker tag $DOCKER_IMAGE:latest $DOCKER_IMAGE:${{ github.run_number }}  # Tag Docker image with build number
+
+      - name: Test WordPress deployment
+        run: |
+          docker run -d -p 8080:80 --name wordpress $DOCKER_IMAGE:${{ github.run_number }}  # Run Docker container in detached mode
+          sleep 10  # Wait for WordPress to start
+          curl -f -s -o /dev/null http://localhost:8080  # Perform basic testing, e.g., checking if WordPress home page loads
+
+      - name: Deploy to AWS EC2
+        run: |
+          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+          aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+          aws configure set default.region $AWS_REGION
+          docker tag $DOCKER_IMAGE:${{ github.run_number }} $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$DOCKER_IMAGE:${{ github.run_number }}
+          docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$DOCKER_IMAGE:${{ github.run_number }}
+
+          # SSH into EC2 instance and run Docker container (example command)
+          ssh -o StrictHostKeyChecking=no ec2-user@$EC2_INSTANCE_IP 'docker pull $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$DOCKER_IMAGE:${{ github.run_number }}'
+
+      - name: Clean up
+        run: |
+          docker stop wordpress  # Stop Docker container
+          docker rm wordpress  # Remove Docker container
+```
+
+### How this cicd is working
+
+- The pipeline is triggered by a push to the main branch of GitHub repository.
+
+- Runs-on: The job runs on an ubuntu-latest virtual machine.
+
+- Uses actions/checkout@v2 to fetch the latest code from your repository.
+
+- Runs Docker commands to build the image using the Dockerfile.
+Tags the Docker image with the build number for versioning.
+
+- Runs the Docker container in detached mode. Waits for the WordPress application to start.
+
+- Uses curl to check if the WordPress home page loads successfully.
+Deploy to AWS EC2:
+
+- Configures AWS CLI with the provided credentials and region.
+
+- Tags and pushes the Docker image to AWS ECR (Elastic Container Registry).
+
+- SSHs into the EC2 instance and runs the Docker container.
+Clean Up:
+
+- Stops and removes the local Docker container used for testing.
