@@ -17,11 +17,11 @@ A WordPress application with a MySQL database, ensuring persistent storage for t
     Run compose file and can check the wordpress page at your local machine if we are running this in local or we can use ec2 and aws services as explained in below sections.
 
 # AWS Environment Setup for WordPress Deployment
-    - 1: Setting Up an EC2 Instance for Docker Containers
-    - 2: Setting Up an RDS Instance for MySQL
-    - 3: Setting Up an S3 Bucket for WordPress Uploads
-    - 4: Setting Up an IAM Role with Necessary Permissions
-    - 5: Connecting WordPress to RDS and S3
+    1: Setting Up an EC2 Instance for Docker Containers
+    2: Setting Up an RDS Instance for MySQL
+    3: Setting Up an S3 Bucket for WordPress Uploads
+    4: Setting Up an IAM Role with Necessary Permissions
+    5: Connecting WordPress to RDS and S3
 
 1. **EC2 Instance**:
    - Amazon Linux 2 instance configured to run Docker containers.
@@ -59,14 +59,14 @@ A WordPress application with a MySQL database, ensuring persistent storage for t
 
 #### Install Docker and Docker Compose in ec2.
      
-`sudo yum update -y`
-`sudo amazon-linux-extras install docker`
-`sudo service docker start`
-`sudo usermod -a -G docker ec2-user`
+```sudo yum update -y```
+```sudo amazon-linux-extras install docker```
+```sudo service docker start```
+```sudo usermod -a -G docker ec2-user```
 
-`sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose`
-`sudo chmod +x /usr/local/bin/docker-compose`
-`docker-compose --version`
+```sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose```
+```sudo chmod +x /usr/local/bin/docker-compose```
+```docker-compose --version```
 
 ### Step 2: Setting Up an RDS Instance for MySQL
 
@@ -170,36 +170,36 @@ volumes:
 
 **Install and Configure WP Offload Media Plugin:**
 
-Install the "WP Offload Media Lite" plugin from the WordPress plugin repository.
+- Install the "WP Offload Media Lite" plugin from the WordPress plugin repository.
 
-Configure the plugin with your S3 bucket credentials.
+- Configure the plugin with your S3 bucket credentials.
 
 
-Log in to Your WordPress Admin Dashboard:
+- Log in to Your WordPress Admin Dashboard:
 
-Navigate to your WordPress website's admin area. You can access it by appending /wp-admin to your domain (e.g., http://yourdomain.com/wp-admin).
+- Navigate to your WordPress website's admin area. You can access it by appending /wp-admin to your domain (e.g., http://yourdomain.com/wp-admin).
 
-Navigate to Plugins:
+- Navigate to Plugins:
 
-In the WordPress admin sidebar, click on "Plugins" -> "Add New".
+- In the WordPress admin sidebar, click on "Plugins" -> "Add New".
 Search for the Plugin:
 
-In the search bar, type "WP Offload Media Lite".
+- In the search bar, type "WP Offload Media Lite".
 
-Install the Plugin:
+- Install the Plugin:
 
-Once you find the "WP Offload Media Lite" plugin in the search results, click on the "Install Now" button next to the plugin.
+- Once you find the "WP Offload Media Lite" plugin in the search results, click on the "Install Now" button next to the plugin.
 Activate the Plugin:
 
-After installation completes, click on the "Activate" button to activate the plugin on your WordPress site.
+- After installation completes, click on the "Activate" button to activate the plugin on your WordPress site.
 
-Configure the Plugin:
+- Configure the Plugin:
 
-After activation, you may need to configure the plugin settings. This typically involves connecting the plugin to your AWS S3 bucket where you want to offload your media uploads. You will need to provide AWS credentials (Access Key ID and Secret Access Key) and specify the S3 bucket details.
+- After activation, you may need to configure the plugin settings. This typically involves connecting the plugin to your AWS S3 bucket where you want to offload your media uploads. You will need to provide AWS credentials (Access Key ID and Secret Access Key) and specify the S3 bucket details.
 
 ### Verify S3 Uploads
 
-Once configured, upload a media file in wordpress. Verify that the file is uploaded to your AWS S3 bucket instead of the local server.
+- Once configured, upload a media file in wordpress. Verify that the file is uploaded to your AWS S3 bucket instead of the local server.
 
 ### Verify EC2 Instance Connectivity
 
@@ -244,7 +244,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2  
-        
+
       - name: Build Docker image
         run: |
           docker build -t $DOCKER_IMAGE .  # Build Docker image from Dockerfile
